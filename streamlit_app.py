@@ -39,14 +39,15 @@ def showTabel():
     # Display the results
 
 def showtime():
-    conn = st.connection("postgresql", type="sql")
+    conn = st.connection("postgresql", type="sql", ttl=None)
+    print("doing")
     sql_query = """
     SELECT sum(decimal_value)
     FROM simon
     WHERE timestamp BETWEEN DATE_TRUNC('day', CURRENT_TIMESTAMP) AND CURRENT_TIMESTAMP;
     """
     # Execute the query and fetch the results
-    today = conn.query(sql_query)
+    today = conn.query(sql_query, ttl=1)
 
     sql_query = """
     SELECT SUM(decimal_value)
@@ -54,15 +55,14 @@ def showtime():
     WHERE timestamp BETWEEN CURRENT_TIMESTAMP - INTERVAL '1 month' AND CURRENT_TIMESTAMP;
     """
 
-    month= conn.query(sql_query)
+    month= conn.query(sql_query,ttl=1)
 
     sql_query = """
     SELECT SUM(decimal_value)
     FROM simon
     """
 
-    end = conn.query(sql_query)
-
+    end = conn.query(sql_query, ttl=1)
     return (today.iloc[0,0], month.iloc[0,0], end.iloc[0,0])
 
 
@@ -77,8 +77,9 @@ with col2:
 
 bt = st.button("Save", type="primary")
 
+print("doing1")
 
-if(bt):
+if bt:
     datetime1 = dt.combine(datetime.date.today(), start)
     datetime2 = dt.combine(datetime.date.today(), end)
 
@@ -90,9 +91,9 @@ if(bt):
 
     insertTime(minutes_diff, title)
 
-    st.header(f"Time simon cost us today: {str(showtime()[0])} minutes")
-    st.header(f"Time simon cost us this Month: {str(showtime()[1])} minutes")
-    st.header(f"Time simon cost us overall: {str(showtime()[2])} minutes")
+st.header(f"Time simon cost us today: {str(showtime()[0])} minutes")
+st.header(f"Time simon cost us this Month: {str(showtime()[1])} minutes")
+st.header(f"Time simon cost us overall: {str(showtime()[2])} minutes")
 
 
 
